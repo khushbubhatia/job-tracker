@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Job Tracker Test</title>
+</head>
+<body>
+  <h2>Send Job Data to Backend</h2>
+  <button onclick="sendJob()">Send Job</button>
+
+  <script>
+    function sendJob() {
+      fetch('http://localhost:5000/api/jobs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          company: "Amazon",
+          position: "Software Developer",
+          status: "Applied",
+          notes: "Submitted via job portal",
+          link: "https://amazon.jobs"
+        })
+      })
+      .then(res => res.json())
+      .then(data => console.log("✅ Success:", data))
+      .catch(err => console.error("❌ Error:", err));
+    }
+  </script>
+</body>
+</html>
