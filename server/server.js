@@ -1,25 +1,41 @@
+// server/server.js
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
+const dotenv = require('dotenv');
+const authRoutes = require('./routes/auth');
+const jobRoutes = require('./routes/jobRoutes');
+dotenv.config();
 
 const app = express();
-app.use(express.json());
+
+// Middleware
 app.use(cors());
+app.use(express.json());
 
-// 👇 This line connects the route file
-const jobRoutes = require('./routes/jobRoutes'); // ✔️ Not '../routes/jobRoutes'
-app.use('/api/jobs', jobRoutes); // 👈 All routes start with /api/jobs
+// Routes
+app.use('/api/jobs', jobRoutes);
+app.use('/api/auth', authRoutes);
 
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.error("DB connection error:", err));
-
-// Root route
+// Root route (just for testing)
 app.get('/', (req, res) => {
-  res.send('API is running...');
+  res.send('Job Tracker API is running...');
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('✅ MongoDB connected'))
+.catch((err) => console.error('❌ MongoDB connection failed:', err));
+
+// Start server
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    app.listen(5000, () => {
+      console.log('Server running on port 5000');
+    });
+  })
+  .catch((err) => console.error('MongoDB connection error:', err));

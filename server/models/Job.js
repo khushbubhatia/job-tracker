@@ -23,6 +23,11 @@ const jobSchema = new mongoose.Schema({
   },
   link: {
     type: String,
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
 });
 

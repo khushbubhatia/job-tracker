@@ -1,60 +1,58 @@
 const express = require('express');
 const router = express.Router();
 const Job = require('../models/Job');
+const authMiddleware = require('../middleware/authMiddleware');
 
-// Get all jobs
+// ✅ Apply auth middleware to all routes
+router.use(authMiddleware);
+
+// ✅ Create a new job (with userId)
+router.post('/', async (req, res) => {
+  try {
+    const job = new Job({ ...req.body, userId: req.user.userId });
+    await job.save();
+    res.status(201).json(job);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ✅ Get all jobs for the logged-in user
 router.get('/', async (req, res) => {
   try {
-    const jobs = await Job.find().sort({ dateApplied: -1 });
+    const jobs = await Job.find({ userId: req.user.userId }).sort({ dateApplied: -1 });
     res.json(jobs);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Add a new job
-router.post('/', async (req, res) => {
+// ✅ Update a job (only if it belongs to the user)
+router.patch('/:id', async (req, res) => {
   try {
-    const newJob = new Job(req.body);
-    const savedJob = await newJob.save();
-    res.status(201).json(savedJob);
+    const job = await Job.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.userId },
+      req.body,
+      { new: true }
+    );
+
+    if (!job) return res.status(404).json({ error: 'Job not found or unauthorized' });
+    res.json(job);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Update a job
-router.put('/:id', async (req, res) => {
-  try {
-    const updatedJob = await Job.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(updatedJob);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-// Delete a job
+// ✅ Delete a job (only if it belongs to the user)
 router.delete('/:id', async (req, res) => {
   try {
-    const job = await Job.findByIdAndDelete(req.params.id);
-    if (!job) return res.status(404).json({ error: 'Job not found' });
+    const job = await Job.findOneAndDelete({ _id: req.params.id, userId: req.user.userId });
+
+    if (!job) return res.status(404).json({ error: 'Job not found or unauthorized' });
     res.status(200).json({ message: 'Job deleted' });
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
 });
-// ✅ Update a job by ID
-router.patch('/:id', async (req, res) => {
-  try {
-    const updatedJob = await Job.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    if (!updatedJob) return res.status(404).json({ error: 'Job not found' });
-    res.json(updatedJob);
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
 
 module.exports = router;

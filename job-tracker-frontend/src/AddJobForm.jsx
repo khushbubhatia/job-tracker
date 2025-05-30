@@ -9,32 +9,42 @@ function AddJobForm({ onAddJob }) {
   const [notes, setNotes] = useState('');
   const [dateApplied, setDateApplied] = useState(new Date().toISOString());
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!company || !position) return;
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!company || !position) return;
 
-    const newJob = { company, position, link, status, notes, dateApplied };
+  const newJob = { company, position, link, status, notes, dateApplied };
 
-    try {
-      const res = await fetch('http://localhost:5000/api/jobs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newJob),
-      });
+  try {
+    const token = localStorage.getItem('token');
+    const res = await fetch('http://localhost:5000/api/jobs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(newJob),
+    });
 
-      const savedJob = await res.json();
-      onAddJob(savedJob);
-
-      setCompany('');
-      setPosition('');
-      setLink('');
-      setStatus('Applied');
-      setNotes('');
-      setDateApplied(new Date().toISOString());
-    } catch (err) {
-      console.error('Failed to add job:', err);
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || 'Failed to add job');
     }
-  };
+
+    const savedJob = await res.json();
+    onAddJob(savedJob);
+
+    // Reset form
+    setCompany('');
+    setPosition('');
+    setLink('');
+    setStatus('Applied');
+    setNotes('');
+    setDateApplied(new Date().toISOString());
+  } catch (err) {
+    console.error('Failed to add job:', err.message);
+  }
+};
 
   return (
     <form
