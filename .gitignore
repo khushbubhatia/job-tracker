@@ -7,18 +7,39 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-job-tracker-frontend/node_modules
-dist
-dist-ssr
+# Dependency directories
+node_modules/
+
+# Production build output
+dist/
+build/
+dist-ssr/
+
+# Local environment files
 *.local
+.env
+.env.*.local
+
+# OS junk
+.DS_Store
+Thumbs.db
 
 # Editor directories and files
-.vscode/*
+.vscode/
 !.vscode/extensions.json
-.idea
-.DS_Store
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Optional: Ignore test coverage output
+coverage/
+
+# Optional: Ignore Parcel cache
+.cache/
+
+# Optional: Next.js or Vite related
+.next/
+out/

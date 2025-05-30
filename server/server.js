@@ -6,6 +6,9 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/auth');
 const jobRoutes = require('./routes/jobRoutes');
+const dashboardRoute = require('./routes/dashboard');
+app.use('/api/dashboard', dashboardRoute);
+
 dotenv.config();
 
 const app = express();
